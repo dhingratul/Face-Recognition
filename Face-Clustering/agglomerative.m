@@ -1,26 +1,33 @@
+% ---------------------------------------------------------------------- %
+% Author: Atul Dhingra
+% dhingra[dot]atul92[at]gmail.com
+% ---------------------------------------------------------------------- %
 clear all; close all;
 addpath(genpath('/home/labuser/Dropbox/Research/FaceVerification/Dataset/'));
-addpath(genpath('/home/labuser/Dropbox/Research/FaceVerification/Code/References'));
 % load data;
 % fea=double(fea);
 % gnd=double(gnd);
 % fea=normc(fea);
-num=248;
-c=1.15:.001:1.16
-c=1.1530:0.00001:1.541;
+% num=248;
+c=0.5:0.01:0.6; %Swami
+% c=1:0.000001:1.16 ; %Attributes
+% c=1.1550:0.00001:1.156;
+% c=1.1530:0.00001:1.541;% Works with the entire data, frame average
 % [data,label,attr]=userselect(fea,gnd,attributes,num);
 %% Swami
 load swamideepfeatures.mat
+fea=normc(fea);
 load ijba_splits.mat
 % [data,labelR]=classbalance(gnd,fea);
 % [lookup,label]=labelSet(labelR);
 % Data split
-[index]=lookupValues(lookup,split3);
-[data,label]=datasplit(index,fea,gnd);
-data=normc(data);
+[index,index2,gender,skinColor,mediaID]=lookupValues(lookup,split10);
+[data,label,male,sColor,mediaLabel]=datasplit(index,index2,mediaID,fea,gnd,gender,skinColor);
+[outdata,outlabel,attr1,attr2]=mediaAverage(data,label,mediaLabel,male,sColor);
+% data=normc(data);
 % [~,label]=labelSet(gnd);
-fea=normc(fea);
-% %% Attributes-PubFig
+
+%% Attributes-PubFig
 % Male=sign(attr(:,1)); %1
 % Mustache=sign(attr(:,17)); %2
 % NoBeard=sign(attr(:,46)); %3
@@ -35,22 +42,26 @@ fea=normc(fea);
 % Three=find(attrm(:,2)==1);
 % Four=find(attrm(:,2)==-1);
 % [data3,data4,label3,label4,attr1,attr2]=partition(double(datam),double(labelm),Three,Four,attrm);
+%% Attribute-IJBA
+%% Entire set
+mastersplit=[split1;split2;split3;split4;split5;split6;split7;split8;split9;split10];
+[outdata,outlabel,attr1,attr2]=wholeSet(fea,gnd,lookup,mastersplit);
+%%
+topattributes=[attr1 attr2];
+One=find(topattributes(:,1)==1); %Male
+Two=find(topattributes(:,1)==0); %Female
+[datam,dataf,labelm,labelf,attrm,attrf]=partition(outdata,outlabel,One,Two,topattributes);
+One=find(attrm(:,2)==1);%Skin Color
+Two=find(attrm(:,2)==3); %Skin Color
+%Male->Skin Color
+[datas1,datas3,labels1,labels3,attrs1,attrs3]=partition(datam,labelm,One,Two,attrm);
 %% Clustering
-data=data; label=label;
+% output_entire=acluster(fea,gnd,c)
+output_base=acluster(outdata,outlabel,c)
+output_M=acluster(datam,labelm,c)
+output_F=acluster(dataf,labelf,c)
+output_M_1=acluster(datas1,labels1,c)
+output_M_3=acluster(datas3,labels3,c)
 
-% [lbpfeatures]=computelbp(data,label);
-Z = linkage(data,'average','cosine');
-T=cluster(Z,'cutoff',c);
-% T = cluster(Z,'maxclust',num);
-% for i=1:size(T,2)
-%     x(i,1)=max(unique(T(:,i)));
-% end
-% plot(c,x);xlabel('c parameter');ylabel('Number of clusters')
-for i=1:size(T,2)
-%     [f(i,1) P(i,1)]=fmeasure(label,T(:,i));
-%     disp(i);disp(P);disp(f)
-      [prec(i,1),rec(i,1)] = compute_pairwise_precision_recall(label', T(:,i)') ; 
-      f1(i,1)=(2*prec(i,1)*rec(i,1))/(prec(i,1)+rec(i,1));
-      disp(f1(i,1)); 
-end
-plot(c,f1);
+
+% plot(c,f1);
