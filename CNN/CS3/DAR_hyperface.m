@@ -1,5 +1,5 @@
 %% Function to find the landmarks based on Hyperface
-% The function inputs name, subject_id, and lookupH from DAR_cs3
+% The function inputs name, subject_id, and lookupH from DAR_cs3.m
 % and outputs the face landmarks based on Hyperface
 function[landmarks,thresh_out,face_pts]=DAR_hyperface(name,subj_id,lookupH,viz)
 if nargin<2
