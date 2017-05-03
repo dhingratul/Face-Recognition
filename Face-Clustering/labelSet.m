@@ -1,3 +1,4 @@
+%% Function to label Sets based on following
 % This function takes in a skipped ordered label, and puts in
 % ordered set and outputs the correct label, and a lookup 
 function[lookup,label]=labelSet(label)
