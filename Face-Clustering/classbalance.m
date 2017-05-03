@@ -1,3 +1,6 @@
+%% Function to solve class imbalance
+% Input : Ground truth label, and features
+% Output : Class balanced data 
 function[data,label]=classbalance(gnd,fea)
 outlabels=[]; balancedArray=[];
 orderedArray=[gnd,fea];
